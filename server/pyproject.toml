@@ -1,0 +1,36 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "fastapi[standard]>=0.128.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.15.0",
+    "taskipy>=1.14.1",
+]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+preview = true
+
+[tool.ruff.format]
+preview = true
+
+[tool.pytest.ini_options]
+pythonpath = "."
+
+[tool.taskipy.tasks]
+lint = 'ruff check'
+pre_format = 'ruff check --fix'
+format = 'ruff format'
+run = 'fastapi dev server/app.py'
+pre_test = 'task lint'
+test = 'pytest -s -x --cov=server -vv'
