@@ -6,6 +6,7 @@ using Server.Domain.Interfaces.Repositories;
 using Server.Domain.Interfaces.Services.Security;
 using Server.Domain.ValueObjects.Security;
 using Server.Infrastructure.Data;
+using Server.Infrastructure.Data.Seeding;
 using Server.Infrastructure.Repositories;
 using Server.Infrastructure.Services.Security;
 
@@ -19,6 +20,7 @@ public static class DependencyInjectionExtension
         AddOptionsValidation(services, configuration);
         AddServices(services, configuration);
         AddDbContext(services, configuration);
+        AddDatabaseSeeder(services);
     }
 
     private static void AddRepositories(IServiceCollection services)
@@ -59,5 +61,10 @@ public static class DependencyInjectionExtension
             options.EnableSensitiveDataLogging();
             options.EnableDetailedErrors();
         });
+    }
+
+    private static void AddDatabaseSeeder(IServiceCollection services)
+    {
+        services.AddScoped<DatabaseSeeder>();
     }
 }

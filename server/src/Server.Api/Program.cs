@@ -2,6 +2,7 @@ using Serilog;
 
 using Server.Api.Middlewares;
 using Server.Infrastructure;
+using Server.Infrastructure.Extensions;
 using Server.Infrastructure.Utils.Logging;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 WebApplication app = builder.Build();
+
+// Auto Migration and Database Seeding
+if (app.Configuration.GetValue<bool>("System:Flags:AutoMigrations"))
+{
+    Log.Information("Auto-migrations enabled, seeding database...");
+    await app.SeedDatabaseAsync();
+}
+
 
 // Add request logging middleware
 app.UseMiddleware<RequestLoggingMiddleware>();

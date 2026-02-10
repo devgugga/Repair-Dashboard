@@ -115,10 +115,10 @@ namespace Server.Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("deleted_at");
 
-                    b.Property<string>("IMEI")
+                    b.Property<string>("Imei")
                         .HasMaxLength(15)
                         .HasColumnType("character varying(15)")
-                        .HasColumnName("i_m_e_i");
+                        .HasColumnName("imei");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -152,7 +152,7 @@ namespace Server.Infrastructure.Migrations
                     b.HasIndex("DeletedAt")
                         .HasDatabaseName("ix_device_deleted_at");
 
-                    b.HasIndex("IMEI")
+                    b.HasIndex("Imei")
                         .HasDatabaseName("ix_devices_imei");
 
                     b.HasIndex("IsActive")

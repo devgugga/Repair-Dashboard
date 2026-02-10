@@ -27,7 +27,7 @@ public class DeviceConfiguration : BaseEntityConfiguration<Device>
         builder.Property(d => d.SerialNumber)
             .HasMaxLength(100);
 
-        builder.Property(d => d.IMEI)
+        builder.Property(d => d.Imei)
             .HasMaxLength(15);
 
         builder.Property(d => d.Condition)
@@ -43,7 +43,7 @@ public class DeviceConfiguration : BaseEntityConfiguration<Device>
         builder.HasIndex(d => d.ClientId)
             .HasDatabaseName("ix_devices_client_id");
 
-        builder.HasIndex(d => d.IMEI)
+        builder.HasIndex(d => d.Imei)
             .HasDatabaseName("ix_devices_imei");
     }
 }

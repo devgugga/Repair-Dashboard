@@ -100,7 +100,7 @@ namespace Server.Infrastructure.Migrations
                     model = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     color = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     serial_number = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    i_m_e_i = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
+                    imei = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
                     condition = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     client_id = table.Column<Guid>(type: "uuid", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "NOW()"),
@@ -236,7 +236,7 @@ namespace Server.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_devices_imei",
                 table: "devices",
-                column: "i_m_e_i");
+                column: "imei");
 
             migrationBuilder.CreateIndex(
                 name: "ix_person_created_at",

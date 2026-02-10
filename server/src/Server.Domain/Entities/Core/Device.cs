@@ -13,7 +13,7 @@ public class Device : BaseEntity
 
     public string? SerialNumber { get; set; }
 
-    public string? IMEI { get; set; }
+    public string? Imei { get; set; }
 
     public string? Condition { get; set; }
 
