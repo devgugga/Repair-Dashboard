@@ -5,7 +5,9 @@ import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
+import { useAuthStore } from '@features/auth/model/useAuthStore'
 import { useTheme } from '@features/theme-toggle/model/useTheme'
 
 type TicketStatus = 'Open' | 'In Progress' | 'Resolved'
@@ -73,23 +75,30 @@ function getImpactSeverity(value: unknown): 'danger' | 'warn' | 'secondary' {
 }
 
 const { themeMode, resolvedTheme, toggleTheme, setThemeMode } = useTheme()
+const authStore = useAuthStore()
+const router = useRouter()
 
 const themeButtonLabel = computed(() =>
   resolvedTheme.value === 'dark' ? 'Switch to Light' : 'Switch to Dark',
 )
+
+async function handleLogout(): Promise<void> {
+  authStore.logout()
+  await router.replace('/login')
+}
 </script>
 
 <template>
-  <main class="dashboard-page">
-    <section class="dashboard-header">
+  <main class="mx-auto max-w-7xl px-5 py-8">
+    <section class="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
       <div>
-        <p class="eyebrow">Repair Dashboard</p>
-        <h1>Operations Overview</h1>
-        <p class="theme-state">
+        <p class="mb-1 text-xs tracking-[0.08em] text-muted-color uppercase">Repair Dashboard</p>
+        <h1 class="text-3xl font-semibold tracking-tight">Operations Overview</h1>
+        <p class="mt-2 text-sm text-muted-color">
           Theme: {{ resolvedTheme }} <span v-if="themeMode === 'system'">(following system)</span>
         </p>
       </div>
-      <div class="header-actions">
+      <div class="flex flex-wrap gap-2">
         <Button :label="themeButtonLabel" severity="secondary" outlined @click="toggleTheme" />
         <Button
           label="Use System Theme"
@@ -98,26 +107,31 @@ const themeButtonLabel = computed(() =>
           :disabled="themeMode === 'system'"
           @click="setThemeMode('system')"
         />
+        <Button label="Sair" severity="contrast" text @click="handleLogout" />
         <Button label="New Ticket" />
         <Button label="Export Report" severity="secondary" outlined />
       </div>
     </section>
 
-    <section class="kpi-grid">
-      <Card v-for="item in kpis" :key="item.label">
+    <section class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <Card
+        v-for="item in kpis"
+        :key="item.label"
+        class="border border-surface-200 shadow-md shadow-black/5 dark:border-surface-700"
+      >
         <template #content>
-          <p class="kpi-label">{{ item.label }}</p>
-          <p class="kpi-value">{{ item.value }}</p>
-          <p class="kpi-trend">{{ item.trend }}</p>
+          <p class="text-sm text-muted-color">{{ item.label }}</p>
+          <p class="mt-1 text-3xl font-bold tracking-tight">{{ item.value }}</p>
+          <p class="mt-1 text-xs text-muted-color">{{ item.trend }}</p>
         </template>
       </Card>
     </section>
 
     <section>
-      <Card>
+      <Card class="border border-surface-200 shadow-md shadow-black/5 dark:border-surface-700">
         <template #title>Recent Tickets</template>
         <template #content>
-          <DataTable :value="tickets" striped-rows size="small">
+          <DataTable :value="tickets" class="w-full" striped-rows size="small">
             <Column field="id" header="Ticket" />
             <Column field="asset" header="Asset" />
             <Column header="Status">
