@@ -21,7 +21,7 @@ export default defineConfigWithVueTs(
   vueTsConfigs.recommended,
   {
     name: 'tests/disable-type-aware-linting',
-    files: ['src/**/*.spec.ts'],
+    files: ['src/**/*.spec.ts', 'src/test/**/*.ts'],
     languageOptions: {
       parserOptions: {
         projectService: false,

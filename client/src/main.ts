@@ -3,6 +3,7 @@ import 'primeicons/primeicons.css'
 
 import { createApp } from 'vue'
 import PrimeVue from 'primevue/config'
+import Tooltip from 'primevue/tooltip'
 import Aura from '@primeuix/themes/aura'
 import { definePreset } from '@primeuix/themes'
 
@@ -47,5 +48,6 @@ app.use(PrimeVue, {
     },
   },
 })
+app.directive('tooltip', Tooltip)
 
 app.mount('#app')

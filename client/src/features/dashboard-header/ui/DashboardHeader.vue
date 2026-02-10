@@ -118,6 +118,13 @@ function toggleOverflowMenu(event: Event): void {
 
         <div class="flex items-center gap-1 md:hidden">
           <Button
+            icon="pi pi-bars"
+            text
+            rounded
+            aria-label="Abrir navegação"
+            @click="emit('open-sidebar')"
+          />
+          <Button
             icon="pi pi-ellipsis-v"
             text
             rounded

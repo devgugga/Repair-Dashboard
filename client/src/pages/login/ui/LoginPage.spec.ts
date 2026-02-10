@@ -1,7 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import Aura from '@primeuix/themes/aura'
 import PrimeVue from 'primevue/config'
 
 import pinia from '@app/providers/pinia'
@@ -21,12 +20,7 @@ async function mountLoginPage() {
         [
           PrimeVue,
           {
-            theme: {
-              preset: Aura,
-              options: {
-                darkModeSelector: '[data-theme="dark"]',
-              },
-            },
+            ripple: true,
           },
         ],
       ],

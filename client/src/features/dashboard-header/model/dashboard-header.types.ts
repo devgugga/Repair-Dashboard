@@ -11,6 +11,7 @@ export interface DashboardHeaderProps {
 }
 
 export type DashboardHeaderEmits = {
+  (event: 'open-sidebar'): void
   (event: 'open-profile'): void
   (event: 'open-settings'): void
   (event: 'open-notifications'): void

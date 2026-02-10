@@ -1,6 +1,5 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import Aura from '@primeuix/themes/aura'
 import PrimeVue from 'primevue/config'
 
 import App from '@app/App.vue'
@@ -26,12 +25,7 @@ describe('App smoke', () => {
           [
             PrimeVue,
             {
-              theme: {
-                preset: Aura,
-                options: {
-                  darkModeSelector: '[data-theme="dark"]',
-                },
-              },
+              ripple: true,
             },
           ],
         ],
