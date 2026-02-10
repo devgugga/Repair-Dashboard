@@ -1,5 +1,6 @@
 using Serilog;
 
+using Server.Api.Middlewares;
 using Server.Infrastructure;
 using Server.Infrastructure.Utils.Logging;
 
@@ -16,6 +17,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 WebApplication app = builder.Build();
+
+// Add request logging middleware
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) app.MapOpenApi();

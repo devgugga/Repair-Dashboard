@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
+using Server.Domain.Entities.Core;
+
 namespace Server.Infrastructure.Data;
 
 public class ServerDbContext(DbContextOptions<ServerDbContext> options) : DbContext(options)
@@ -73,4 +75,15 @@ public class ServerDbContext(DbContextOptions<ServerDbContext> options) : DbCont
 
         return result.ToString();
     }
+
+    #region Core
+
+    public DbSet<Person> Persons { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Client> Clients { get; set; }
+    public DbSet<Device> Devices { get; set; }
+    public DbSet<ServiceOrder> ServiceOrders { get; set; }
+    public DbSet<ServiceOrderItem> ServiceOrderItems { get; set; }
+
+    #endregion
 }
