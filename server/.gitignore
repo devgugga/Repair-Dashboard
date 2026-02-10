@@ -137,6 +137,8 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.uv-cache/
+.pre-commit-cache/
 nosetests.xml
 coverage.xml
 *.cover
@@ -255,3 +257,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+pytest-*
