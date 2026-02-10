@@ -18,7 +18,7 @@
 
   body {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     @apply min-h-screen bg-surface-50 text-color antialiased transition-colors duration-200 dark:bg-surface-950;
   }
 

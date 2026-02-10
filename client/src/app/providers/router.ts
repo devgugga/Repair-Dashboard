@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import AppLayout from '@app/layouts/AppLayout.vue'
 import pinia from '@app/providers/pinia'
 import { useAuthStore } from '@features/auth/model/useAuthStore'
 import DashboardPage from '@pages/dashboard/ui/DashboardPage.vue'
@@ -18,11 +19,21 @@ const router = createRouter({
     },
     {
       path: '/',
-      name: 'dashboard',
-      component: DashboardPage,
+      component: AppLayout,
       meta: {
         requiresAuth: true,
       },
+      children: [
+        {
+          path: '',
+          name: 'dashboard',
+          component: DashboardPage,
+          meta: {
+            title: 'Operations Overview',
+            subtitle: 'Gestão completa de clientes, aparelhos, consertos e peças.',
+          },
+        },
+      ],
     },
   ],
 })
