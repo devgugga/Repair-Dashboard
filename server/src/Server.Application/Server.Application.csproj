@@ -10,4 +10,12 @@
     <ProjectReference Include="..\Server.Domain\Server.Domain.csproj"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Logging\" />
+  </ItemGroup>
+
 </Project>
