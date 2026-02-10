@@ -37,5 +37,4 @@ public class UserConfiguration : BaseEntityConfiguration<User>
             .IsUnique() // 1:1 relationship
             .HasDatabaseName("ix_users_person_id");
     }
-
 }

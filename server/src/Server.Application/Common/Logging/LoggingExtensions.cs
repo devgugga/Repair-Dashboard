@@ -36,5 +36,4 @@ public static class LoggingExtensions
             .ForContext("Details", details, true)
             .Information("Audit: {Operation} on {EntityType} {EntityId}", operation, entityType, entityId);
     }
-
 }

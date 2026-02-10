@@ -1,0 +1,38 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Pooling=true;Database=server_db;User Id=postgres;Password=pass132"
+  },
+  "Security": {
+    "Jwt": {
+      "Issuer": "https://server.com.br",
+      "Audience": "https://api.server.com.br",
+      // Generate a secure key: https://jwtsecretkeygenerator.com/
+      // Use the Enhanced Secret Key for better security
+      "Key": "YOUR_SUPER_SECURE_256_BITS_KEY"
+    },
+    "Cryptography": {
+      "MasterKey": "YOUR_BASE64_MASTER_KEY",
+      "KeyDerivationSalt": "YOUR_BASE64_KEY_DERIVATION_SALT",
+      "Iterations": 100000
+    },
+    "Password": {
+      "DegreeOfParallelism": 2,
+      "MemorySize": 16384,
+      "Iterations": 2,
+      "SaltSize": 16,
+      "HashLenght": 32
+    }
+  },
+  "System": {
+    "Flags": {
+      "AutoMigrations": true
+    }
+  }
+}

@@ -37,5 +37,4 @@ public class RequestLoggingMiddleware(
                     stopwatch.ElapsedMilliseconds);
         }
     }
-
 }

@@ -81,4 +81,3 @@ public class PersonConfiguration : BaseEntityConfiguration<Person>
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
-

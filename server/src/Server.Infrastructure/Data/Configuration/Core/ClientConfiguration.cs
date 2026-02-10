@@ -23,4 +23,3 @@ public class ClientConfiguration : BaseEntityConfiguration<Client>
             .HasDatabaseName("ix_clients_person_id");
     }
 }
-

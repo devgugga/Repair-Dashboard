@@ -89,5 +89,4 @@ public static class SerilogConfiguration
 
         builder.Host.UseSerilog();
     }
-
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-
 using Serilog.Core;
 using Serilog.Events;
 
@@ -70,7 +69,6 @@ public class RequestEnricher : ILogEventEnricher
 
         return httpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
     }
-
 }
 
 public static class ServiceProviderAccessor
