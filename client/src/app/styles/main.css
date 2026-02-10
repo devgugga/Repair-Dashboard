@@ -1,0 +1,128 @@
+:root {
+  --brand-primary: #1d4ed8;
+  --brand-accent: #0ea5e9;
+  --surface-bg: #f5f7fb;
+  --surface-panel: #ffffff;
+  --surface-border: #dce3ee;
+  --text-primary: #0f172a;
+  --text-secondary: #5b6476;
+  --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='dark'] {
+  --brand-primary: #60a5fa;
+  --brand-accent: #22d3ee;
+  --surface-bg: #0b1220;
+  --surface-panel: #121a2b;
+  --surface-border: #1f2b44;
+  --text-primary: #e2e8f0;
+  --text-secondary: #9aa7bf;
+  --shadow-soft: 0 10px 28px rgba(2, 6, 23, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.dashboard-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.2rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.7rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.theme-state {
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.kpi-label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.kpi-value {
+  margin: 0.3rem 0 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.kpi-trend {
+  margin: 0.4rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.p-card {
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-soft);
+}
+
+@media (max-width: 1024px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-header {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "name": "client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-s typecheck build-only",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "prepare": "husky",
+    "precommit:staged": "lint-staged",
+    "type-check": "vue-tsc --build",
+    "typecheck": "vue-tsc --build",
+    "lint": "run-s lint:oxlint lint:eslint",
+    "lint:fix": "run-s lint:oxlint:fix lint:eslint:fix",
+    "lint:oxlint": "oxlint .",
+    "lint:oxlint:fix": "oxlint . --fix",
+    "lint:eslint": "eslint . --cache",
+    "lint:eslint:fix": "eslint . --fix --cache",
+    "format": "oxfmt .",
+    "format:check": "oxfmt . --check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "check": "run-s format:check lint typecheck",
+    "ci:check": "run-s lint typecheck test build-only"
+  },
+  "dependencies": {
+    "@primeuix/themes": "^2.0.3",
+    "pinia": "^3.0.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.5.4",
+    "vue": "^3.5.27",
+    "vue-router": "^5.0.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "^24.0.4",
+    "@types/node": "^24.10.9",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.8.1",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-oxlint": "~1.42.0",
+    "eslint-plugin-vue": "~10.7.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.6.1",
+    "jsdom": "^28.0.0",
+    "lint-staged": "^16.2.7",
+    "npm-run-all2": "^8.0.4",
+    "oxfmt": "^0.27.0",
+    "oxlint": "~1.42.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-vue-devtools": "^8.0.5",
+    "vitest": "^4.0.18",
+    "vue-tsc": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue,css,scss,sass,less,styl,html,json,yml,yaml,md}": [
+      "oxfmt"
+    ],
+    "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}": [
+      "eslint --cache --fix"
+    ]
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0",
+    "pnpm": "^10.29.2"
+  },
+  "packageManager": "pnpm@10.29.2"
+}
