@@ -1,6 +1,7 @@
 using Serilog;
 
 using Server.Api.Middlewares;
+using Server.Application;
 using Server.Infrastructure;
 using Server.Infrastructure.Extensions;
 using Server.Infrastructure.Utils.Logging;
@@ -16,6 +17,7 @@ builder.Services.AddOpenApi();
 
 // Add Dependencies
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 
 WebApplication app = builder.Build();
 

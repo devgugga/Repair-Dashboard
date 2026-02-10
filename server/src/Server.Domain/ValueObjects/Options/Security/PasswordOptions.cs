@@ -1,4 +1,4 @@
-﻿namespace Server.Domain.ValueObjects.Security;
+﻿namespace Server.Domain.ValueObjects.Options.Security;
 
 public class PasswordOptions
 {

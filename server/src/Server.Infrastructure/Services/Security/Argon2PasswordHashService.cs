@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Server.Domain.Interfaces.Services.Security;
-using Server.Domain.ValueObjects.Security;
+using Server.Domain.ValueObjects.Options.Security;
 
 namespace Server.Infrastructure.Services.Security;
 

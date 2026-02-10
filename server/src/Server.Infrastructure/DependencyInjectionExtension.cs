@@ -4,10 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Server.Domain.Interfaces.Repositories;
 using Server.Domain.Interfaces.Services.Security;
-using Server.Domain.ValueObjects.Security;
+using Server.Domain.ValueObjects.Options.Security;
 using Server.Infrastructure.Data;
 using Server.Infrastructure.Data.Seeding;
 using Server.Infrastructure.Repositories;
+using Server.Infrastructure.Services.Core;
 using Server.Infrastructure.Services.Security;
 
 namespace Server.Infrastructure;
@@ -34,6 +35,11 @@ public static class DependencyInjectionExtension
             .BindConfiguration(PasswordOptions.SectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
     }
 
     private static void AddServices(IServiceCollection services, IConfiguration configuration)
@@ -41,9 +47,13 @@ public static class DependencyInjectionExtension
         // Configurações de segurança
         services.Configure<PasswordOptions>(
             configuration.GetSection(PasswordOptions.SectionName));
+        services.Configure<JwtOptions>(
+            configuration.GetSection(JwtOptions.SectionName));
 
         // Serviços de segurança
         services.AddScoped<IPasswordHashService, Argon2PasswordHashService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IAuthService, AuthService>();
     }
 
     private static void AddDbContext(IServiceCollection services, IConfiguration configuration)
