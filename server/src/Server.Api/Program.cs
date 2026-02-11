@@ -1,5 +1,6 @@
 using Serilog;
 
+using Server.Api.Filters;
 using Server.Api.Middlewares;
 using Server.Application;
 using Server.Infrastructure;
@@ -11,7 +12,15 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Configure Serilog Early
 builder.ConfigureSerilog();
 
-builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor(); // Required for TraceService
+
+builder.Services.AddControllers(options =>
+{
+    // Add global exception filter
+    options.Filters.Add<GlobalExceptionFilter>();
+});
+
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -29,6 +38,8 @@ if (app.Configuration.GetValue<bool>("System:Flags:AutoMigrations"))
 }
 
 
+// Add error handling middleware first (to catch all errors)
+app.UseMiddleware<ErrorHandlingMiddleware>();
 // Add request logging middleware
 app.UseMiddleware<RequestLoggingMiddleware>();
 

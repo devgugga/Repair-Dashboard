@@ -9,13 +9,13 @@ public interface IAuthUseCase
     ///     Authenticate user and generate tokens
     ///     Returns wrapper with refresh token for Controller cookie management
     /// </summary>
-    Task<AuthResponseWithToken?> LoginAsync(AuthRequest request, string clientIp, string userAgent);
+    Task<AuthResponseWithToken> LoginAsync(AuthRequest request, string clientIp, string userAgent);
 
     /// <summary>
     ///     Refresh access token using refresh token
     ///     Returns wrapper with new refresh token for Controller cookie management
     /// </summary>
-    Task<AuthResponseWithToken?> RefreshTokenAsync(string? refreshToken, string clientIp, string userAgent);
+    Task<AuthResponseWithToken> RefreshTokenAsync(string? refreshToken, string clientIp, string userAgent);
 
     /// <summary>
     ///     Logout current user (revoke refresh token)

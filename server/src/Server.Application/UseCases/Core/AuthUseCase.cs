@@ -6,6 +6,7 @@ using FluentValidation.Results;
 using Server.Application.DTOs.Request.Core;
 using Server.Application.DTOs.Response.Core;
 using Server.Application.UseCases.Interfaces.Core;
+using Server.Domain.Exceptions.Security;
 using Server.Domain.Interfaces.Services.Security;
 using Server.Domain.ValueObjects.Params.Security;
 using Server.Domain.ValueObjects.Results.Security;
@@ -18,7 +19,7 @@ public class AuthUseCase(
     IValidator<AuthRequest> validator)
     : IAuthUseCase
 {
-    public async Task<AuthResponseWithToken?> LoginAsync(AuthRequest request, string clientIp, string userAgent)
+    public async Task<AuthResponseWithToken> LoginAsync(AuthRequest request, string clientIp, string userAgent)
     {
         // 1. Validate request
         ValidationResult? validationResult = await validator.ValidateAsync(request);
@@ -32,22 +33,22 @@ public class AuthUseCase(
         // 3. Call domain service
         AuthResult? authResult = await authService.LoginAsync(credentials);
         if (authResult == null)
-            return null;
+            throw new InvalidCredentialsException();
 
         // 4. Map to wrapper DTO (includes refresh token for Controller)
         return mapper.Map<AuthResponseWithToken>(authResult);
     }
 
-    public async Task<AuthResponseWithToken?> RefreshTokenAsync(string? refreshToken, string clientIp, string userAgent)
+    public async Task<AuthResponseWithToken> RefreshTokenAsync(string? refreshToken, string clientIp, string userAgent)
     {
         // 1. Validate refresh token
         if (string.IsNullOrEmpty(refreshToken))
-            return null;
+            throw new InvalidTokenException("Refresh token is required");
 
         // 2. Call domain service
         AuthResult? authResult = await authService.RefreshTokenAsync(refreshToken, clientIp, userAgent);
         if (authResult == null)
-            return null;
+            throw new InvalidTokenException("Invalid or expired refresh token");
 
         // 3. Map to wrapper DTO (includes new refresh token for Controller)
         return mapper.Map<AuthResponseWithToken>(authResult);

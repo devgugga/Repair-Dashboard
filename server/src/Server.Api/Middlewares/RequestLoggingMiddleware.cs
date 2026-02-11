@@ -1,40 +1,56 @@
 ﻿using System.Diagnostics;
 
+using Server.Api.Extensions;
+using Server.Domain.Interfaces.Services.Common;
+
 namespace Server.Api.Middlewares;
 
 public class RequestLoggingMiddleware(
     RequestDelegate next,
-    ILogger<RequestLoggingMiddleware> logger)
+    ILogger<RequestLoggingMiddleware> logger,
+    ITraceService traceService)
 {
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
-        string correlationId = context.TraceIdentifier;
+        string traceId = traceService.GetCurrentTraceId();
 
-        logger.LogInformation("Starting request {Method} {Path}", context.Request.Method, context.Request.Path);
+        // Extract additional request information
+        string userAgent = context.Request.Headers.UserAgent.FirstOrDefault() ?? "Unknown";
+        string clientIp = context.GetClientIpAddress();
+        string userId = context.User?.Identity?.Name ?? "Anonymous";
 
-        try
+        using (logger.BeginScope(new Dictionary<string, object>
+               {
+                   ["TraceId"] = traceId, ["UserId"] = userId, ["ClientIp"] = clientIp, ["UserAgent"] = userAgent
+               }))
         {
-            await next(context);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Request {Method} {Path} failed with exception", context.Request.Method,
-                context.Request.Path);
-            throw;
-        }
-        finally
-        {
-            stopwatch.Stop();
+            logger.LogInformation("Starting request {Method} {Path} {QueryString}",
+                context.Request.Method, context.Request.Path, context.Request.QueryString);
 
-            if (context.Response.StatusCode >= 400)
-                logger.LogWarning("Completed request {Method} {Path} with status {StatusCode} in {ElapsedMs}ms",
+            try
+            {
+                await next(context);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Request {Method} {Path} failed with exception",
+                    context.Request.Method, context.Request.Path);
+                throw;
+            }
+            finally
+            {
+                stopwatch.Stop();
+
+                LogLevel logLevel = context.Response.StatusCode >= 500 ? LogLevel.Error :
+                    context.Response.StatusCode >= 400 ? LogLevel.Warning :
+                    LogLevel.Information;
+
+                logger.Log(logLevel,
+                    "Completed request {Method} {Path} with status {StatusCode} in {ElapsedMs}ms",
                     context.Request.Method, context.Request.Path, context.Response.StatusCode,
                     stopwatch.ElapsedMilliseconds);
-            else
-                logger.LogInformation("Completed request {Method} {Path} with status {StatusCode} in {ElapsedMs}ms",
-                    context.Request.Method, context.Request.Path, context.Response.StatusCode,
-                    stopwatch.ElapsedMilliseconds);
+            }
         }
     }
 }

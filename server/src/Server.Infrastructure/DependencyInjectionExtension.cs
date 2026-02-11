@@ -3,11 +3,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Server.Domain.Interfaces.Repositories;
+using Server.Domain.Interfaces.Services.Common;
 using Server.Domain.Interfaces.Services.Security;
 using Server.Domain.ValueObjects.Options.Security;
 using Server.Infrastructure.Data;
 using Server.Infrastructure.Data.Seeding;
 using Server.Infrastructure.Repositories;
+using Server.Infrastructure.Services.Common;
 using Server.Infrastructure.Services.Core;
 using Server.Infrastructure.Services.Security;
 
@@ -49,6 +51,9 @@ public static class DependencyInjectionExtension
             configuration.GetSection(PasswordOptions.SectionName));
         services.Configure<JwtOptions>(
             configuration.GetSection(JwtOptions.SectionName));
+
+        // Serviços comuns
+        services.AddSingleton<ITraceService, TraceService>();
 
         // Serviços de segurança
         services.AddScoped<IPasswordHashService, Argon2PasswordHashService>();

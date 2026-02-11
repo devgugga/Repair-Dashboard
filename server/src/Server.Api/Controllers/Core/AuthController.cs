@@ -2,11 +2,10 @@
 
 using AutoMapper;
 
-using FluentValidation;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Server.Api.Extensions;
 using Server.Application.DTOs.Request.Core;
 using Server.Application.DTOs.Response.Core;
 using Server.Application.UseCases.Interfaces.Core;
@@ -20,30 +19,21 @@ public class AuthController(IAuthUseCase authUseCase, IMapper mapper) : Controll
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] AuthRequest request)
     {
-        try
-        {
-            // UseCase returns wrapper with refresh token
-            AuthResponseWithToken? responseWithToken = await authUseCase.LoginAsync(
-                request,
-                GetClientIpAddress(), // Controller extracts
-                GetUserAgent() // Controller extracts
-            );
+        // UseCase returns wrapper with refresh token (exceptions handled by GlobalExceptionFilter)
+        AuthResponseWithToken responseWithToken = await authUseCase.LoginAsync(
+            request,
+            HttpContext.GetClientIpAddress(), // Controller extracts
+            GetUserAgent() // Controller extracts
+        );
 
-            if (responseWithToken == null)
-                return Unauthorized("Invalid credentials");
+        // Controller responsibility: handle refresh token cookie
+        SetRefreshTokenCookie(responseWithToken.RefreshToken, responseWithToken.RefreshTokenExpiresAt);
 
-            // Controller responsibility: handle refresh token cookie
-            SetRefreshTokenCookie(responseWithToken.RefreshToken, responseWithToken.RefreshTokenExpiresAt);
+        // Convert wrapper to public response (without refresh token)
+        AuthResponse publicResponse = mapper.Map<AuthResponse>(responseWithToken);
 
-            // Convert wrapper to public response (without refresh token)
-            AuthResponse? publicResponse = mapper.Map<AuthResponse>(responseWithToken);
+        return Ok(publicResponse);
 
-            return Ok(publicResponse);
-        }
-        catch (ValidationException ex)
-        {
-            return BadRequest(ex);
-        }
     }
 
     [HttpPost("refresh")]
@@ -52,22 +42,21 @@ public class AuthController(IAuthUseCase authUseCase, IMapper mapper) : Controll
         // Controller responsibility: extract refresh token from cookie
         string? refreshToken = GetRefreshTokenFromCookie();
 
-        AuthResponseWithToken? responseWithToken = await authUseCase.RefreshTokenAsync(
+        // UseCase handles validation and throws exceptions (handled by GlobalExceptionFilter)
+        AuthResponseWithToken responseWithToken = await authUseCase.RefreshTokenAsync(
             refreshToken,
-            GetClientIpAddress(),
+            HttpContext.GetClientIpAddress(),
             GetUserAgent()
         );
-
-        if (responseWithToken == null)
-            return Unauthorized("Invalid refresh token");
 
         // Controller responsibility: handle new refresh token cookie
         SetRefreshTokenCookie(responseWithToken.RefreshToken, responseWithToken.RefreshTokenExpiresAt);
 
         // Convert wrapper to public response (without refresh token)
-        AuthResponse? publicResponse = mapper.Map<AuthResponse>(responseWithToken);
+        AuthResponse publicResponse = mapper.Map<AuthResponse>(responseWithToken);
 
         return Ok(publicResponse);
+
     }
 
     [HttpPost("logout")]
@@ -101,7 +90,7 @@ public class AuthController(IAuthUseCase authUseCase, IMapper mapper) : Controll
         return Ok(new { success });
     }
 
-    [HttpPost("admin/logout-user/{userId}")]
+    [HttpPost("admin/logout-user/{userId:guid}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> LogoutUser(Guid userId)
     {
@@ -110,18 +99,6 @@ public class AuthController(IAuthUseCase authUseCase, IMapper mapper) : Controll
     }
 
     #region Controller Helpers (ASP.NET Specific)
-
-    private string GetClientIpAddress()
-    {
-        // Check for forwarded IP first (behind proxy/load balancer)
-        string? forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(forwardedFor)) return forwardedFor.Split(',')[0].Trim();
-
-        string? realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(realIp)) return realIp;
-
-        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-    }
 
     private string GetUserAgent()
     {
