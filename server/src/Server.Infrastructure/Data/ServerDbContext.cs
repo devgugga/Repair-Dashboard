@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 using Server.Domain.Entities.Core;
+using Server.Domain.Entities.Security;
 
 namespace Server.Infrastructure.Data;
 
@@ -84,6 +85,16 @@ public class ServerDbContext(DbContextOptions<ServerDbContext> options) : DbCont
     public DbSet<Device> Devices { get; set; }
     public DbSet<ServiceOrder> ServiceOrders { get; set; }
     public DbSet<ServiceOrderItem> ServiceOrderItems { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<RolePermission> RolePermissions { get; set; }
+
+    #endregion
+
+    #region Security
+
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     #endregion
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 using Server.Domain.Entities.Core;
+using Server.Domain.Interfaces.Services.Core;
 using Server.Domain.Interfaces.Services.Security;
 using Server.Domain.ValueObjects.Options.Security;
 
@@ -15,29 +16,44 @@ namespace Server.Infrastructure.Services.Security;
 public class JwtTokenService : IJwtTokenService
 {
     private readonly JwtOptions _jwtOptions;
+    private readonly IRbacService _rbacService;
     private readonly SymmetricSecurityKey _securityKey;
     private readonly JwtSecurityTokenHandler _tokenHandler;
 
-    public JwtTokenService(IOptions<JwtOptions> jwtOptions)
+    public JwtTokenService(IOptions<JwtOptions> jwtOptions, IRbacService rbacService)
     {
+        _rbacService = rbacService;
         _jwtOptions = jwtOptions.Value;
         _securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
         _tokenHandler = new JwtSecurityTokenHandler();
     }
 
+    // Backward compatibility - will be removed later
     public string GenerateAccessToken(User user)
+    {
+        return GenerateAccessTokenAsync(user).GetAwaiter().GetResult();
+    }
+
+    public async Task<string> GenerateAccessTokenAsync(User user)
     {
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName),
             new(ClaimTypes.Email, user.Person.Email),
-            new(ClaimTypes.Role, user.Role.ToString()),
             new("person_id", user.PersonId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
                 ClaimValueTypes.Integer64)
         };
+
+        // Add roles to claims
+        IEnumerable<string> roleNames = await _rbacService.GetUserRoleNamesAsync(user.Id);
+        claims.AddRange(roleNames.Select(roleName => new Claim(ClaimTypes.Role, roleName)));
+
+        // Add permissions to claims
+        IEnumerable<string> permissions = await _rbacService.GetUserPermissionNamesAsync(user.Id);
+        claims.AddRange(permissions.Select(permission => new Claim("permission", permission)));
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -51,6 +67,7 @@ public class JwtTokenService : IJwtTokenService
         SecurityToken? token = _tokenHandler.CreateToken(tokenDescriptor);
         return _tokenHandler.WriteToken(token);
     }
+
 
     public string GenerateRefreshToken()
     {

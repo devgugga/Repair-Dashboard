@@ -22,6 +22,10 @@ public static class DependencyInjectionExtension
     private static void AddUseCases(this IServiceCollection services)
     {
         services.AddScoped<IAuthUseCase, AuthUseCase>();
+        services.AddScoped<IRoleUseCase, RoleUseCase>();
+        services.AddScoped<IPermissionUseCase, PermissionUseCase>();
+        services.AddScoped<IUserRoleUseCase, UserRoleUseCase>();
+
     }
 
     private static void AddMappers(this IServiceCollection services)
@@ -29,6 +33,7 @@ public static class DependencyInjectionExtension
         services.AddAutoMapper(cfg =>
         {
             cfg.AddProfile<AuthMappingProfile>();
+            cfg.AddProfile<RbacMappingProfile>();
         });
     }
 

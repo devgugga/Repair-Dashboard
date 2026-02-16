@@ -5,6 +5,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Server.Api.Attributes;
 using Server.Api.Extensions;
 using Server.Application.DTOs.Request.Core;
 using Server.Application.DTOs.Response.Core;
@@ -91,7 +92,7 @@ public class AuthController(IAuthUseCase authUseCase, IMapper mapper) : Controll
     }
 
     [HttpPost("admin/logout-user/{userId:guid}")]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("users", "manage_roles")]
     public async Task<IActionResult> LogoutUser(Guid userId)
     {
         bool success = await authUseCase.LogoutAllAsync(userId);

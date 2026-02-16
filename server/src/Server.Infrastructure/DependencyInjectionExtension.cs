@@ -3,12 +3,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Server.Domain.Interfaces.Repositories;
+using Server.Domain.Interfaces.Repositories.Core;
 using Server.Domain.Interfaces.Services.Common;
+using Server.Domain.Interfaces.Services.Core;
 using Server.Domain.Interfaces.Services.Security;
 using Server.Domain.ValueObjects.Options.Security;
 using Server.Infrastructure.Data;
 using Server.Infrastructure.Data.Seeding;
 using Server.Infrastructure.Repositories;
+using Server.Infrastructure.Repositories.Core;
 using Server.Infrastructure.Services.Common;
 using Server.Infrastructure.Services.Core;
 using Server.Infrastructure.Services.Security;
@@ -29,6 +32,11 @@ public static class DependencyInjectionExtension
     private static void AddRepositories(IServiceCollection services)
     {
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+
     }
 
     private static void AddOptionsValidation(IServiceCollection services, IConfiguration configuration)
@@ -55,10 +63,13 @@ public static class DependencyInjectionExtension
         // Serviços comuns
         services.AddSingleton<ITraceService, TraceService>();
 
+        // Serviços core
+        services.AddScoped<IRbacService, RbacService>();
+        services.AddScoped<IAuthService, AuthService>();
+
         // Serviços de segurança
         services.AddScoped<IPasswordHashService, Argon2PasswordHashService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
-        services.AddScoped<IAuthService, AuthService>();
     }
 
     private static void AddDbContext(IServiceCollection services, IConfiguration configuration)

@@ -67,7 +67,6 @@ public class UserSeeder : BaseDataSeeder
             PersonId = adminPersonId,
             UserName = "admin",
             PasswordHash = adminPasswordHash,
-            Role = UserRole.Admin,
             IsLocked = false,
             FailedLoginAttempts = 0,
             CreatedAt = DateTime.UtcNow,

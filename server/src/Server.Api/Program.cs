@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
+
 using Serilog;
 
+using Server.Api.Authorization;
 using Server.Api.Filters;
 using Server.Api.Middlewares;
 using Server.Application;
@@ -27,6 +30,12 @@ builder.Services.AddOpenApi();
 // Add Dependencies
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+
+// Add Authorization
+builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
 
 WebApplication app = builder.Build();
 

@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-using Server.Domain.Enums.Core;
-
 namespace Server.Domain.Entities.Core;
 
 [Table("Users")]
@@ -10,8 +8,6 @@ public class User : BaseEntity
     public string UserName { get; set; }
 
     public string PasswordHash { get; set; }
-
-    public UserRole Role { get; set; } = UserRole.Viewer;
 
     public DateTimeOffset? LastLogin { get; set; }
 
@@ -23,4 +19,5 @@ public class User : BaseEntity
     public virtual Person Person { get; set; } = null!;
 
     public virtual ICollection<ServiceOrder> AssignedServiceOrders { get; set; } = [];
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 }

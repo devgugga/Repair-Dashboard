@@ -1,4 +1,5 @@
 ﻿using Server.Domain.Entities.Core;
+using Server.Domain.Interfaces.Services.Core;
 
 namespace Server.Domain.ValueObjects.Results.Security;
 
@@ -17,6 +18,33 @@ public class AuthResult
     public Guid PersonId { get; set; }
     public DateTimeOffset LastLogin { get; set; }
 
+    public static async Task<AuthResult> SuccessAsync(
+        string accessToken,
+        string refreshToken,
+        DateTime accessExpiry,
+        DateTime refreshExpiry,
+        User user,
+        IRbacService rbacService)
+    {
+        IEnumerable<string> roles = await rbacService.GetUserRoleNamesAsync(user.Id);
+        string primaryRole = roles.FirstOrDefault() ?? "User";
+
+        return new AuthResult
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpiresAt = accessExpiry,
+            RefreshTokenExpiresAt = refreshExpiry,
+            UserId = user.Id,
+            UserName = user.UserName,
+            Email = user.Person.Email,
+            Role = primaryRole,
+            PersonId = user.PersonId,
+            LastLogin = user.LastLogin ?? DateTimeOffset.UtcNow
+        };
+    }
+
+    // Backward compatibility - will be removed later
     public static AuthResult Success(
         string accessToken,
         string refreshToken,
@@ -33,7 +61,7 @@ public class AuthResult
             UserId = user.Id,
             UserName = user.UserName,
             Email = user.Person.Email,
-            Role = user.Role.ToString(),
+            Role = "Admin", // TODO: Implementar roles do RBAC
             PersonId = user.PersonId,
             LastLogin = user.LastLogin ?? DateTimeOffset.UtcNow
         };

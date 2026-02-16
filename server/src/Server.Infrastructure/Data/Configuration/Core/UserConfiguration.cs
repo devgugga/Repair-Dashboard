@@ -23,10 +23,11 @@ public class UserConfiguration : BaseEntityConfiguration<User>
             .IsRequired()
             .HasMaxLength(255);
 
-        // Enum para string
-        builder.Property(u => u.Role)
-            .HasConversion<string>()
-            .HasMaxLength(50);
+        // Relacionamentos
+        builder.HasMany(u => u.UserRoles)
+            .WithOne(ur => ur.User)
+            .HasForeignKey(ur => ur.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Índices
         builder.HasIndex(u => u.UserName)
