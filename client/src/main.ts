@@ -10,6 +10,8 @@ import { definePreset } from '@primeuix/themes'
 import App from '@app/App.vue'
 import pinia from '@app/providers/pinia'
 import router from '@app/providers/router'
+import { useAuthStore } from '@features/auth/model/useAuthStore'
+import { configureApiClientAuth } from '@shared/api/apiClient'
 import { initTheme } from '@shared/config/theme/theme.service'
 
 const AppPreset = definePreset(Aura, {
@@ -35,6 +37,12 @@ initTheme()
 const app = createApp(App)
 
 app.use(pinia)
+const authStore = useAuthStore(pinia)
+configureApiClientAuth({
+  getAuthorizationHeader: () => authStore.authorizationHeader,
+  refreshSession: () => authStore.refreshSession(),
+  onUnauthorized: () => authStore.clearSession(),
+})
 app.use(router)
 app.use(PrimeVue, {
   theme: {

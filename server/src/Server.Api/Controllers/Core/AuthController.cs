@@ -122,6 +122,24 @@ public class AuthController(IAuthUseCase authUseCase, IMapper mapper) : Controll
         return Ok(new { success });
     }
 
+    /// <summary>
+    ///     Returns the current authenticated user profile with effective permissions.
+    /// </summary>
+    /// <returns>The current user profile and permissions.</returns>
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<ActionResult<AuthMeResponse>> Me()
+    {
+        // Controller responsibility: extract user ID from claims
+        Guid? userId = GetCurrentUserId();
+        if (!userId.HasValue)
+            return Unauthorized();
+
+        // UseCase handles profile and permission retrieval
+        AuthMeResponse response = await authUseCase.GetCurrentUserAsync(userId.Value);
+        return Ok(response);
+    }
+
     #region Controller Helpers (ASP.NET Specific)
 
     /// <summary>

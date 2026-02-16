@@ -14,7 +14,7 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-const email = ref('')
+const userName = ref('')
 const password = ref('')
 const rememberMe = ref(false)
 const errorMessage = ref('')
@@ -34,21 +34,22 @@ function resolveRedirectTarget(): string {
 async function handleSubmit(): Promise<void> {
   errorMessage.value = ''
 
-  if (!email.value.trim() || !password.value) {
-    errorMessage.value = 'Informe e-mail e senha para continuar.'
+  if (!userName.value.trim() || !password.value) {
+    errorMessage.value = 'Informe usuário e senha para continuar.'
     return
   }
 
   try {
     await authStore.login({
-      email: email.value.trim(),
+      userName: userName.value.trim(),
       password: password.value,
       rememberMe: rememberMe.value,
     })
 
     await router.replace(resolveRedirectTarget())
-  } catch {
-    errorMessage.value = 'E-mail ou senha inválidos.'
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Não foi possível entrar no sistema. Tente novamente.'
   }
 }
 </script>
@@ -94,13 +95,13 @@ async function handleSubmit(): Promise<void> {
         <template #content>
           <form class="mt-1 grid gap-4" @submit.prevent="handleSubmit">
             <label class="grid gap-2 text-sm text-muted-color">
-              <span class="font-semibold text-color">E-mail</span>
+              <span class="font-semibold text-color">Usuário</span>
               <InputText
-                v-model="email"
+                v-model="userName"
                 class="w-full rounded-xl!"
-                type="email"
+                type="text"
                 autocomplete="username"
-                placeholder="admin@repair.com.br"
+                placeholder="Digite seu usuário"
               />
             </label>
 
@@ -141,7 +142,7 @@ async function handleSubmit(): Promise<void> {
       </Card>
 
       <p class="text-center text-xs text-muted-color lg:col-span-2">
-        Usuário de demonstração: admin@repair.com.br / mypass@132
+        Entre com suas credenciais do sistema oficial.
       </p>
     </section>
   </main>

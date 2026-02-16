@@ -17,12 +17,15 @@ function isPersistedAuthState(value: unknown): value is PersistedAuthState {
     state.version === AUTH_STORAGE_VERSION &&
     typeof state.updatedAt === 'string' &&
     typeof state.rememberMe === 'boolean' &&
+    typeof state.accessToken === 'string' &&
+    typeof state.expiresAt === 'string' &&
+    typeof state.tokenType === 'string' &&
     !!state.user &&
     typeof state.user.id === 'string' &&
-    typeof state.user.name === 'string' &&
+    typeof state.user.userName === 'string' &&
     typeof state.user.email === 'string' &&
     typeof state.user.role === 'string' &&
-    typeof state.token === 'string'
+    typeof state.user.lastLogin === 'string'
   )
 }
 

@@ -26,4 +26,9 @@ public interface IAuthUseCase
     ///     Logout from all devices (revoke all refresh tokens)
     /// </summary>
     Task<bool> LogoutAllAsync(Guid userId);
+
+    /// <summary>
+    ///     Gets the current authenticated user profile and effective permissions.
+    /// </summary>
+    Task<AuthMeResponse> GetCurrentUserAsync(Guid userId);
 }

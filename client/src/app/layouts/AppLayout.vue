@@ -19,7 +19,7 @@ const pageTitle = computed(() => route.meta.title ?? 'Dashboard')
 const pageSubtitle = computed(() => route.meta.subtitle ?? '')
 
 async function handleLogout(): Promise<void> {
-  authStore.logout()
+  await authStore.logout()
   await router.replace('/login')
 }
 
@@ -58,7 +58,7 @@ function handleMobileNavigate(): void {
       :title="pageTitle"
       :subtitle="pageSubtitle"
       :user-name="authStore.displayName || 'Administrador'"
-      user-role="Admin"
+      :user-role="authStore.user?.role || 'Admin'"
       :resolved-theme="resolvedTheme"
       @open-sidebar="handleOpenSidebar"
       @open-profile="handleOpenProfile"

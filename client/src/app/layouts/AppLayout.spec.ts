@@ -59,7 +59,11 @@ describe.sequential('App layout routing', () => {
       status: 'authenticated',
       initialized: true,
       user: FAKE_AUTH_USER,
-      token: 'mock-token',
+      permissions: [],
+      profileLoaded: true,
+      accessToken: 'mock-token',
+      expiresAt: '2030-01-01T00:00:00.000Z',
+      tokenType: 'Bearer',
       rememberMe: true,
     })
 
@@ -79,7 +83,11 @@ describe.sequential('App layout routing', () => {
       status: 'authenticated',
       initialized: true,
       user: FAKE_AUTH_USER,
-      token: 'mock-token',
+      permissions: [],
+      profileLoaded: true,
+      accessToken: 'mock-token',
+      expiresAt: '2030-01-01T00:00:00.000Z',
+      tokenType: 'Bearer',
       rememberMe: true,
     })
 

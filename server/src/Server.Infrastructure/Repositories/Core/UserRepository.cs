@@ -91,12 +91,9 @@ public class UserRepository(ServerDbContext context) : BaseRepository<User>(cont
         return await _context.UserRoles
             .Where(ur => ur.UserId == userId && ur.IsActive)
             .Where(ur => ur.ExpiresAt == null || ur.ExpiresAt > DateTimeOffset.UtcNow)
-            .Include(ur => ur.Role)
-            .ThenInclude(r => r.RolePermissions)
-            .ThenInclude(rp => rp.Permission)
             .SelectMany(ur => ur.Role.RolePermissions)
-            .Select(rp => rp.Permission.FullPermission)
-            .Where(p => !string.IsNullOrEmpty(p))
+            .Select(rp => rp.Permission.Resource + "." + rp.Permission.Action)
+            .Where(p => p != null && p != ".")
             .Distinct()
             .ToListAsync();
     }

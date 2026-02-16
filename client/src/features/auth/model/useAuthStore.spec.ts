@@ -1,8 +1,44 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { AUTH_FAKE_DELAY_MS, AUTH_STORAGE_KEY, FAKE_AUTH_CREDENTIALS } from './auth.constants'
+import { AUTH_STORAGE_KEY } from './auth.constants'
 import { useAuthStore } from './useAuthStore'
+
+function createAuthSuccessResponse(overrides?: Record<string, unknown>): Response {
+  return new Response(
+    JSON.stringify({
+      accessToken: 'jwt-token',
+      expiresAt: '2030-01-01T00:00:00.000Z',
+      tokenType: 'Bearer',
+      user: {
+        id: 'u-1',
+        userName: 'admin',
+        email: 'admin@repair.com.br',
+        role: 'admin',
+        lastLogin: '2026-02-16T00:00:00.000Z',
+      },
+      ...overrides,
+    }),
+    { status: 200 },
+  )
+}
+
+function createMeSuccessResponse(overrides?: Record<string, unknown>): Response {
+  return new Response(
+    JSON.stringify({
+      user: {
+        id: 'u-1',
+        userName: 'admin',
+        email: 'admin@repair.com.br',
+        role: 'admin',
+        lastLogin: '2026-02-16T00:00:00.000Z',
+      },
+      permissions: ['users.read', 'users.manage_roles'],
+      ...overrides,
+    }),
+    { status: 200 },
+  )
+}
 
 describe('useAuthStore', () => {
   beforeEach(() => {
@@ -21,61 +57,122 @@ describe('useAuthStore', () => {
     expect(authStore.status).toBe('unauthenticated')
   })
 
-  it('authenticates and persists login when credentials are valid', async () => {
-    vi.useFakeTimers()
+  it('authenticates and persists login when API credentials are valid', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    fetchSpy.mockResolvedValueOnce(createAuthSuccessResponse())
+    fetchSpy.mockResolvedValueOnce(createMeSuccessResponse())
 
     const authStore = useAuthStore()
-    const loginPromise = authStore.login({
-      email: FAKE_AUTH_CREDENTIALS.email,
-      password: FAKE_AUTH_CREDENTIALS.password,
+    await authStore.login({
+      userName: 'admin',
+      password: 'secret',
       rememberMe: true,
     })
 
-    vi.advanceTimersByTime(AUTH_FAKE_DELAY_MS)
-    await loginPromise
-
     expect(authStore.isAuthenticated).toBe(true)
-    expect(authStore.user?.email).toBe(FAKE_AUTH_CREDENTIALS.email)
-    expect(authStore.rememberMe).toBe(true)
+    expect(authStore.user?.userName).toBe('admin')
+    expect(authStore.permissions).toContain('users.read')
+    expect(authStore.profileLoaded).toBe(true)
+    expect(authStore.accessToken).toBe('jwt-token')
     expect(window.localStorage.getItem(AUTH_STORAGE_KEY)).toBeTruthy()
   })
 
-  it('clears state and storage on logout', async () => {
-    vi.useFakeTimers()
+  it('refreshes session and updates access token', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    fetchSpy.mockResolvedValueOnce(createAuthSuccessResponse())
+    fetchSpy.mockResolvedValueOnce(createMeSuccessResponse())
+    fetchSpy.mockResolvedValueOnce(createAuthSuccessResponse({ accessToken: 'jwt-token-2' }))
 
     const authStore = useAuthStore()
-    const loginPromise = authStore.login({
-      email: FAKE_AUTH_CREDENTIALS.email,
-      password: FAKE_AUTH_CREDENTIALS.password,
+    await authStore.login({
+      userName: 'admin',
+      password: 'secret',
       rememberMe: false,
     })
 
-    vi.advanceTimersByTime(AUTH_FAKE_DELAY_MS)
-    await loginPromise
+    const refreshed = await authStore.refreshSession()
 
-    authStore.logout()
+    expect(refreshed).toBe(true)
+    expect(authStore.accessToken).toBe('jwt-token-2')
+    expect(window.sessionStorage.getItem(AUTH_STORAGE_KEY)).toBeTruthy()
+  })
 
+  it('clears state when refresh fails', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    fetchSpy.mockResolvedValueOnce(createAuthSuccessResponse())
+    fetchSpy.mockResolvedValueOnce(createMeSuccessResponse())
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ status: 401, title: 'Authentication failed.' }), {
+        status: 401,
+      }),
+    )
+
+    const authStore = useAuthStore()
+    await authStore.login({
+      userName: 'admin',
+      password: 'secret',
+      rememberMe: false,
+    })
+
+    const refreshed = await authStore.refreshSession()
+
+    expect(refreshed).toBe(false)
     expect(authStore.isAuthenticated).toBe(false)
     expect(authStore.user).toBeNull()
-    expect(authStore.token).toBeNull()
-    expect(window.localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull()
-    expect(window.sessionStorage.getItem(AUTH_STORAGE_KEY)).toBeNull()
+    expect(authStore.accessToken).toBeNull()
   })
 
   it('rejects invalid credentials and keeps unauthenticated state', async () => {
-    vi.useFakeTimers()
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          status: 401,
+          title: 'Authentication failed.',
+          detail: 'Invalid username or password',
+        }),
+        { status: 401 },
+      ),
+    )
 
     const authStore = useAuthStore()
-    const loginPromise = authStore.login({
-      email: 'wrong@repair.com.br',
-      password: 'wrong',
-      rememberMe: false,
-    })
 
-    vi.advanceTimersByTime(AUTH_FAKE_DELAY_MS)
-    await expect(loginPromise).rejects.toThrow('E-mail ou senha inválidos.')
+    await expect(
+      authStore.login({
+        userName: 'wrong',
+        password: 'wrong',
+        rememberMe: false,
+      }),
+    ).rejects.toThrow('Usuário ou senha inválidos.')
 
     expect(authStore.isAuthenticated).toBe(false)
     expect(authStore.status).toBe('unauthenticated')
+  })
+
+  it('loads current user and permissions with existing session', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    fetchSpy.mockResolvedValueOnce(createMeSuccessResponse())
+
+    const authStore = useAuthStore()
+    authStore.$patch({
+      initialized: true,
+      status: 'authenticated',
+      rememberMe: true,
+      user: {
+        id: 'u-1',
+        userName: 'admin',
+        email: 'admin@repair.com.br',
+        role: 'admin',
+        lastLogin: '2026-02-16T00:00:00.000Z',
+      },
+      accessToken: 'jwt-token',
+      expiresAt: '2030-01-01T00:00:00.000Z',
+      tokenType: 'Bearer',
+    })
+
+    const loaded = await authStore.loadCurrentUser()
+
+    expect(loaded).toBe(true)
+    expect(authStore.permissions).toContain('users.manage_roles')
+    expect(authStore.profileLoaded).toBe(true)
   })
 })

@@ -12,8 +12,10 @@ const validState: PersistedAuthState = {
   version: AUTH_STORAGE_VERSION,
   updatedAt: '2026-02-10T00:00:00.000Z',
   rememberMe: false,
+  accessToken: 'mock-token',
+  expiresAt: '2030-01-01T00:00:00.000Z',
+  tokenType: 'Bearer',
   user: FAKE_AUTH_USER,
-  token: 'mock-token',
 }
 
 describe('auth.persistence', () => {
@@ -39,16 +41,16 @@ describe('auth.persistence', () => {
   it('loads localStorage first when both have payloads', () => {
     window.localStorage.setItem(
       AUTH_STORAGE_KEY,
-      JSON.stringify({ ...validState, rememberMe: true, token: 'local-token' }),
+      JSON.stringify({ ...validState, rememberMe: true, accessToken: 'local-token' }),
     )
     window.sessionStorage.setItem(
       AUTH_STORAGE_KEY,
-      JSON.stringify({ ...validState, rememberMe: false, token: 'session-token' }),
+      JSON.stringify({ ...validState, rememberMe: false, accessToken: 'session-token' }),
     )
 
     const loaded = loadPersistedAuthState()
 
-    expect(loaded?.token).toBe('local-token')
+    expect(loaded?.accessToken).toBe('local-token')
   })
 
   it('clears auth key from both storages', () => {

@@ -147,14 +147,12 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore(pinia)
 
-  if (!authStore.initialized) {
-    authStore.hydrate()
-  }
+  const hasActiveSession = await authStore.ensureSession()
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+  if (to.meta.requiresAuth && !hasActiveSession) {
     return {
       path: '/login',
       query: {
@@ -163,7 +161,7 @@ router.beforeEach((to) => {
     }
   }
 
-  if (to.meta.guestOnly && authStore.isAuthenticated) {
+  if (to.meta.guestOnly && hasActiveSession) {
     return {
       path: '/',
     }
