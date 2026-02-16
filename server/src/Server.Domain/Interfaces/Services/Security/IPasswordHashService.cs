@@ -3,24 +3,24 @@
 public interface IPasswordHashService
 {
     /// <summary>
-    ///     Gera hash da senha usando Argon2id
+    ///     Generates a password hash using Argon2id.
     /// </summary>
-    /// <param name="password">Senha em texto plano</param>
-    /// <returns>Hash da senha (inclui salt e parâmetros)</returns>
+    /// <param name="password">The plain-text password.</param>
+    /// <returns>The password hash including salt and parameters.</returns>
     Task<string> HashPasswordAsync(string password);
 
     /// <summary>
-    ///     Verifica se a senha corresponde ao hash
+    ///     Verifies whether a password matches a stored hash.
     /// </summary>
-    /// <param name="password">Senha em texto plano</param>
-    /// <param name="hash">Hash armazenado</param>
-    /// <returns>True se a senha estiver correta</returns>
+    /// <param name="password">The plain-text password.</param>
+    /// <param name="hash">The stored password hash.</param>
+    /// <returns><c>true</c> when the password is valid; otherwise <c>false</c>.</returns>
     Task<bool> VerifyPasswordAsync(string password, string hash);
 
     /// <summary>
-    ///     Verifica se o hash precisa ser atualizado (parâmetros mudaram)
+    ///     Checks whether a stored hash should be regenerated due to parameter changes.
     /// </summary>
-    /// <param name="hash">Hash atual</param>
-    /// <returns>True se precisar rehash</returns>
+    /// <param name="hash">The current hash value.</param>
+    /// <returns><c>true</c> when rehashing is required; otherwise <c>false</c>.</returns>
     bool NeedsRehash(string hash);
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,8 +18,16 @@ using Server.Infrastructure.Services.Security;
 
 namespace Server.Infrastructure;
 
+/// <summary>
+///     Dependency injection registration for infrastructure layer services.
+/// </summary>
 public static class DependencyInjectionExtension
 {
+    /// <summary>
+    ///     Registers infrastructure repositories, services, options, DbContext, and seeders.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
     public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         AddRepositories(services);
@@ -29,6 +37,10 @@ public static class DependencyInjectionExtension
         AddDatabaseSeeder(services);
     }
 
+    /// <summary>
+    ///     Registers repository implementations.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
     private static void AddRepositories(IServiceCollection services)
     {
         services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -36,9 +48,13 @@ public static class DependencyInjectionExtension
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-
     }
 
+    /// <summary>
+    ///     Registers options binding and startup validation.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
     private static void AddOptionsValidation(IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<PasswordOptions>()
@@ -52,26 +68,36 @@ public static class DependencyInjectionExtension
             .ValidateOnStart();
     }
 
+    /// <summary>
+    ///     Registers infrastructure services.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
     private static void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        // Configurações de segurança
+        // Security options.
         services.Configure<PasswordOptions>(
             configuration.GetSection(PasswordOptions.SectionName));
         services.Configure<JwtOptions>(
             configuration.GetSection(JwtOptions.SectionName));
 
-        // Serviços comuns
+        // Common services.
         services.AddSingleton<ITraceService, TraceService>();
 
-        // Serviços core
+        // Core domain services.
         services.AddScoped<IRbacService, RbacService>();
         services.AddScoped<IAuthService, AuthService>();
 
-        // Serviços de segurança
+        // Security services.
         services.AddScoped<IPasswordHashService, Argon2PasswordHashService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
     }
 
+    /// <summary>
+    ///     Registers the application DbContext and provider settings.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
     private static void AddDbContext(IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ServerDbContext>(options =>
@@ -81,7 +107,7 @@ public static class DependencyInjectionExtension
                 npgsqlOptions => npgsqlOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)
             );
 
-            // Configurações adicionais para desenvolvimento
+            // Additional diagnostics for development.
             if (!configuration.GetValue<bool>("IsDevelopment")) return;
 
             options.EnableSensitiveDataLogging();
@@ -89,6 +115,10 @@ public static class DependencyInjectionExtension
         });
     }
 
+    /// <summary>
+    ///     Registers database seeding coordinator services.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
     private static void AddDatabaseSeeder(IServiceCollection services)
     {
         services.AddScoped<DatabaseSeeder>();

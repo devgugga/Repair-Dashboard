@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 
 using FluentValidation;
 
@@ -14,18 +14,25 @@ using Server.Domain.Interfaces.Services.Common;
 
 namespace Server.Api.Filters;
 
+/// <summary>
+///     Global MVC exception filter that maps domain and validation exceptions to problem+json responses.
+/// </summary>
 public class GlobalExceptionFilter(
     ILogger<GlobalExceptionFilter> logger,
     ITraceService traceService,
     IWebHostEnvironment environment)
     : IExceptionFilter
 {
+    /// <summary>
+    ///     Handles an exception raised during MVC request execution.
+    /// </summary>
+    /// <param name="context">The exception context.</param>
     public void OnException(ExceptionContext context)
     {
         string traceId = traceService.GetCurrentTraceId();
         string instancePath = context.HttpContext.Request.Path;
 
-        // Log the exception with structured logging
+        // Log the exception with structured logging.
         logger.LogError(context.Exception,
             "Unhandled exception occurred. TraceId: {TraceId}, Path: {Path}, Method: {Method}",
             traceId,
@@ -53,6 +60,13 @@ public class GlobalExceptionFilter(
         context.ExceptionHandled = true;
     }
 
+    /// <summary>
+    ///     Creates a validation error response for FluentValidation exceptions.
+    /// </summary>
+    /// <param name="ex">The validation exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>An error response payload.</returns>
     private static ErrorResponse CreateValidationErrorResponse(ValidationException ex, string traceId,
         string instancePath)
     {
@@ -62,7 +76,7 @@ public class GlobalExceptionFilter(
 
         var extensions = new Dictionary<string, object> { { "errorCode", "VALIDATION_FAILED" }, { "errors", errors } };
 
-        // Add validation context if available
+        // Add validation context if available.
         if (ex.Errors.Any())
         {
             string[] errorCodes = ex.Errors
@@ -90,6 +104,13 @@ public class GlobalExceptionFilter(
         };
     }
 
+    /// <summary>
+    ///     Creates a validation error response for domain validation exceptions.
+    /// </summary>
+    /// <param name="ex">The domain validation exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>An error response payload.</returns>
     private static ErrorResponse CreateDomainValidationErrorResponse(DomainValidationException ex, string traceId,
         string instancePath)
     {
@@ -108,6 +129,13 @@ public class GlobalExceptionFilter(
         };
     }
 
+    /// <summary>
+    ///     Creates an authentication error response.
+    /// </summary>
+    /// <param name="ex">The authentication exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>An error response payload.</returns>
     private static ErrorResponse CreateAuthenticationErrorResponse(AuthenticationException ex, string traceId,
         string instancePath)
     {
@@ -123,6 +151,13 @@ public class GlobalExceptionFilter(
         };
     }
 
+    /// <summary>
+    ///     Creates a not-found error response.
+    /// </summary>
+    /// <param name="ex">The not-found exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>An error response payload.</returns>
     private static ErrorResponse CreateNotFoundErrorResponse(NotFoundException ex, string traceId,
         string instancePath)
     {
@@ -138,6 +173,13 @@ public class GlobalExceptionFilter(
         };
     }
 
+    /// <summary>
+    ///     Creates a conflict error response for business rule violations.
+    /// </summary>
+    /// <param name="ex">The business rule violation exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>An error response payload.</returns>
     private static ErrorResponse CreateBusinessRuleErrorResponse(BusinessRuleViolationException ex, string traceId,
         string instancePath)
     {
@@ -153,6 +195,13 @@ public class GlobalExceptionFilter(
         };
     }
 
+    /// <summary>
+    ///     Creates a bad-request error response for generic domain exceptions.
+    /// </summary>
+    /// <param name="ex">The domain exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>An error response payload.</returns>
     private static ErrorResponse CreateDomainErrorResponse(DomainException ex, string traceId, string instancePath)
     {
         return new ErrorResponse
@@ -167,6 +216,13 @@ public class GlobalExceptionFilter(
         };
     }
 
+    /// <summary>
+    ///     Creates an internal-server-error response for unknown exceptions.
+    /// </summary>
+    /// <param name="ex">The unhandled exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>An error response payload.</returns>
     private ErrorResponse CreateInternalServerErrorResponse(Exception ex, string traceId, string instancePath)
     {
         string detail = environment.IsDevelopment()

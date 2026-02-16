@@ -6,8 +6,16 @@ using Server.Domain.Interfaces.Services.Core;
 
 namespace Server.Api.Authorization;
 
+/// <summary>
+///     Authorization handler that validates permission requirements using RBAC service data.
+/// </summary>
 public class PermissionAuthorizationHandler(IRbacService rbacService) : AuthorizationHandler<PermissionRequirement>
 {
+    /// <summary>
+    ///     Handles authorization for a permission requirement.
+    /// </summary>
+    /// <param name="context">The authorization handler context.</param>
+    /// <param name="requirement">The permission requirement being evaluated.</param>
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)

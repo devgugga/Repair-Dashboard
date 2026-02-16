@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +9,18 @@ using Server.Application.UseCases.Interfaces.Core;
 
 namespace Server.Api.Controllers.Core;
 
+/// <summary>
+///     Handles user-role assignment endpoints.
+/// </summary>
 [ApiController]
 [Route("api/users/{userId:guid}/roles")]
 public class UserRoleController(IUserRoleUseCase userRoleUseCase) : ControllerBase
 {
+    /// <summary>
+    ///     Retrieves assigned roles and permissions for a user.
+    /// </summary>
+    /// <param name="userId">The user identifier.</param>
+    /// <returns>User role data when found.</returns>
     [HttpGet("")]
     [RequirePermission("users", "read")]
     public async Task<ActionResult<UserRoleResponse>> GetUserRoles(Guid userId)
@@ -24,6 +32,12 @@ public class UserRoleController(IUserRoleUseCase userRoleUseCase) : ControllerBa
         return Ok(userRoles);
     }
 
+    /// <summary>
+    ///     Assigns one or more roles to a user.
+    /// </summary>
+    /// <param name="userId">The target user identifier.</param>
+    /// <param name="request">The role assignment request.</param>
+    /// <returns>No content when successful.</returns>
     [HttpPost("")]
     [RequirePermission("users", "manage_roles")]
     public async Task<IActionResult> AssignRolesToUser(Guid userId, [FromBody] AssignRoleRequest request)
@@ -36,6 +50,12 @@ public class UserRoleController(IUserRoleUseCase userRoleUseCase) : ControllerBa
         return NoContent();
     }
 
+    /// <summary>
+    ///     Removes a role from a user.
+    /// </summary>
+    /// <param name="userId">The target user identifier.</param>
+    /// <param name="roleId">The role identifier.</param>
+    /// <returns>No content when successful.</returns>
     [HttpDelete("{roleId:guid}")]
     [RequirePermission("users", "manage_roles")]
     public async Task<IActionResult> RemoveRoleFromUser(Guid userId, Guid roleId)
@@ -44,6 +64,10 @@ public class UserRoleController(IUserRoleUseCase userRoleUseCase) : ControllerBa
         return NoContent();
     }
 
+    /// <summary>
+    ///     Reads the current user id from claims.
+    /// </summary>
+    /// <returns>The current user id, or <c>null</c> when unavailable.</returns>
     private Guid? GetCurrentUserId()
     {
         string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

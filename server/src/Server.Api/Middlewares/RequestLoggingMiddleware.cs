@@ -1,21 +1,29 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 using Server.Api.Extensions;
 using Server.Domain.Interfaces.Services.Common;
 
 namespace Server.Api.Middlewares;
 
+/// <summary>
+///     Middleware that logs request start/end information with correlation metadata.
+/// </summary>
 public class RequestLoggingMiddleware(
     RequestDelegate next,
     ILogger<RequestLoggingMiddleware> logger,
     ITraceService traceService)
 {
+    /// <summary>
+    ///     Invokes the middleware for the current HTTP request.
+    /// </summary>
+    /// <param name="context">The current HTTP context.</param>
+    /// <returns>A task representing the asynchronous middleware execution.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
         string traceId = traceService.GetCurrentTraceId();
 
-        // Extract additional request information
+        // Extract additional request information.
         string userAgent = context.Request.Headers.UserAgent.FirstOrDefault() ?? "Unknown";
         string clientIp = context.GetClientIpAddress();
         string userId = context.User?.Identity?.Name ?? "Anonymous";

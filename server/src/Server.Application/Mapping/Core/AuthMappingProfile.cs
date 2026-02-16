@@ -32,6 +32,6 @@ public class AuthMappingProfile : Profile
 
         // AuthResponseWithToken (Wrapper) → AuthResponse (Public DTO)
         CreateMap<AuthResponseWithToken, AuthResponse>();
-        // RefreshToken e RefreshTokenExpiresAt são ignorados (não vão para AuthResponse)
+        // RefreshToken and RefreshTokenExpiresAt are ignored (not exposed in AuthResponse)
     }
 }

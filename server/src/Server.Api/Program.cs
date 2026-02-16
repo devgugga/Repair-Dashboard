@@ -12,53 +12,46 @@ using Server.Infrastructure.Utils.Logging;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog Early
+// Configure Serilog before the app pipeline starts.
 builder.ConfigureSerilog();
 
-builder.Services.AddHttpContextAccessor(); // Required for TraceService
+builder.Services.AddHttpContextAccessor(); // Required for TraceService.
 
 builder.Services.AddControllers(options =>
 {
-    // Add global exception filter
+    // Register global exception filter.
     options.Filters.Add<GlobalExceptionFilter>();
 });
-
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Add Dependencies
+// Register application dependencies.
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
-// Add Authorization
+// Configure authorization components.
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-
 WebApplication app = builder.Build();
 
-// Auto Migration and Database Seeding
+// Apply migrations and seed data automatically when feature flag is enabled.
 if (app.Configuration.GetValue<bool>("System:Flags:AutoMigrations"))
 {
     Log.Information("Auto-migrations enabled, seeding database...");
     await app.SeedDatabaseAsync();
 }
 
-
-// Add error handling middleware first (to catch all errors)
+// Error handling should run first so all downstream failures are captured.
 app.UseMiddleware<ErrorHandlingMiddleware>();
-// Add request logging middleware
 app.UseMiddleware<RequestLoggingMiddleware>();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 try

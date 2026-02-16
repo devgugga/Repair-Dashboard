@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 
 using Server.Application.DTOs.Response.Common;
@@ -6,17 +6,25 @@ using Server.Domain.Interfaces.Services.Common;
 
 namespace Server.Api.Middlewares;
 
+/// <summary>
+///     Middleware that handles unhandled exceptions and returns problem+json responses.
+/// </summary>
 public class ErrorHandlingMiddleware(
     RequestDelegate next,
     ILogger<ErrorHandlingMiddleware> logger,
     ITraceService traceService,
     IWebHostEnvironment environment)
 {
+    /// <summary>
+    ///     Invokes the middleware for the current HTTP request.
+    /// </summary>
+    /// <param name="context">The current HTTP context.</param>
+    /// <returns>A task representing the asynchronous middleware execution.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            // Ensure TraceId is set for the request
+            // Ensure trace id is initialized for this request.
             EnsureTraceId(context);
 
             await next(context);
@@ -27,14 +35,24 @@ public class ErrorHandlingMiddleware(
         }
     }
 
+    /// <summary>
+    ///     Ensures trace metadata is present for correlation.
+    /// </summary>
+    /// <param name="context">The current HTTP context.</param>
     private void EnsureTraceId(HttpContext context)
     {
         if (string.IsNullOrEmpty(context.TraceIdentifier)) context.TraceIdentifier = traceService.GenerateTraceId();
 
-        // Add TraceId to response headers for client tracking
+        // Add trace id to response headers for client tracking.
         context.Response.Headers.TryAdd("X-Trace-Id", context.TraceIdentifier);
     }
 
+    /// <summary>
+    ///     Handles an exception and writes a standardized error response.
+    /// </summary>
+    /// <param name="context">The current HTTP context.</param>
+    /// <param name="exception">The exception to handle.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         string traceId = traceService.GetCurrentTraceId();
@@ -60,6 +78,13 @@ public class ErrorHandlingMiddleware(
         await context.Response.WriteAsync(jsonResponse);
     }
 
+    /// <summary>
+    ///     Creates an error response model from an exception.
+    /// </summary>
+    /// <param name="exception">The source exception.</param>
+    /// <param name="traceId">The correlation trace id.</param>
+    /// <param name="instancePath">The request path.</param>
+    /// <returns>A standardized error response payload.</returns>
     private ErrorResponse CreateErrorResponse(Exception exception, string traceId, string instancePath)
     {
         string detail = environment.IsDevelopment()
