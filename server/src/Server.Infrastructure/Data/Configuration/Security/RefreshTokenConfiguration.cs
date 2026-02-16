@@ -42,6 +42,6 @@ public class RefreshTokenConfiguration : BaseEntityConfiguration<RefreshToken>
 
         // Ignore computed properties
         builder.Ignore(rt => rt.IsExpired);
-        builder.Ignore(rt => rt.IsActive);
+        builder.Ignore(rt => rt.IsValid);
     }
 }

@@ -22,7 +22,7 @@ public class RefreshToken : BaseEntity
 
     public string? UserAgent { get; set; }
     public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
-    public new bool IsActive => !IsRevoked && !IsExpired;
+    public bool IsValid => !IsRevoked && !IsExpired;
 
     /// <summary>
     ///     Revoga o refresh token

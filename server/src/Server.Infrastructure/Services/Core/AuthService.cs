@@ -98,7 +98,7 @@ public class AuthService(
                 .ThenInclude(u => u.Person)
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 
-            if (storedToken is not { IsActive: true })
+            if (storedToken is not { IsValid: true })
             {
                 logger.LogWarning("Refresh token is invalid or expired");
                 return null;
@@ -160,7 +160,7 @@ public class AuthService(
         try
         {
             List<RefreshToken> activeTokens = await context.Set<RefreshToken>()
-                .Where(rt => rt.UserId == userId && rt.IsActive)
+                .Where(rt => rt.UserId == userId && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow)
                 .ToListAsync();
 
             foreach (RefreshToken token in activeTokens) token.Revoke();
@@ -184,7 +184,7 @@ public class AuthService(
             RefreshToken? storedToken = await context.Set<RefreshToken>()
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 
-            return storedToken is { IsActive: true };
+            return storedToken is { IsValid: true };
         }
         catch (Exception ex)
         {

@@ -5,10 +5,12 @@ using Server.Domain.Entities.Core;
 
 namespace Server.Infrastructure.Data.Configuration.Core;
 
-public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
+public class UserRoleConfiguration : BaseEntityConfiguration<UserRole>
 {
-    public void Configure(EntityTypeBuilder<UserRole> builder)
+    public override void Configure(EntityTypeBuilder<UserRole> builder)
     {
+        base.Configure(builder);
+
         builder.HasIndex(ur => new { ur.UserId, ur.RoleId })
             .IsUnique();
 
